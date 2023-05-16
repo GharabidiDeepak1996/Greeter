@@ -1,6 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 
 import {
   SafeAreaView,
@@ -13,6 +15,7 @@ import {
   StatusBar,
   ToastAndroid,
   RefreshControl,
+  Platform,
   VirtualizedList,
 } from "react-native";
 import { Button } from "@react-native-material/core";
@@ -52,8 +55,37 @@ const DATA = [
   },
 ];
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+// Can use this function below OR use Expo's Push Notification Tool from: https://expo.dev/notifications
+async function sendPushNotification(expoPushToken) {
+  const message = {
+    to: expoPushToken,
+    sound: "default",
+    title: "Original Title",
+    body: "And here is the body!",
+    data: { someData: "goes here" },
+  };
+
+  await fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Accept-encoding": "gzip, deflate",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(message),
+  });
+}
+
 function textFormate() {}
-const jobStatus = async (statusid,tripId) => {
+const jobStatus = async (statusid, tripId) => {
   try {
     const response = await fetch(
       "http://132.148.73.104:8082/core/ver1.0/greeter/job/status",
@@ -82,7 +114,6 @@ const jobStatus = async (statusid,tripId) => {
     if (statusCode == 200) {
       if (json.isSuccess == true) {
         //window.location.reload(false);
-       
       } else {
         ToastAndroid.show(json.resultMessage, ToastAndroid.SHORT);
       }
@@ -92,7 +123,6 @@ const jobStatus = async (statusid,tripId) => {
   } finally {
   }
 };
-
 
 const Item = ({
   bookingId,
@@ -179,10 +209,8 @@ const Item = ({
           <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
             {name}
           </Text>
-          
-         
         </View>
-      
+
         <View style={{ flexDirection: "row" }}>
           <MaterialCommunityIcons
             name={"business-outline"}
@@ -208,7 +236,6 @@ const Item = ({
           flex: 1,
         }}
       >
-
         <Text
           style={{
             fontSize: 18,
@@ -229,9 +256,7 @@ const Item = ({
             Pax
           </Text>
         </Text>
-        <Text style={{ fontSize: 16, color: "gray" }}>
-            {"# " + tripId}
-          </Text>
+        <Text style={{ fontSize: 16, color: "gray" }}>{"# " + tripId}</Text>
       </View>
     </View>
 
@@ -377,27 +402,31 @@ const Item = ({
             style={styles.materialButtonPrimary}
             onPress={() => {
               if (statusId == "1512") {
-                jobStatus(1513,tripId)
+                jobStatus(1513, tripId);
 
-                  navigation.navigate("TripDetailsScreen", {
-                    passengerName: name,
-                    pickUp: pickupFrom,
-                    dropOff: dropOffAdd,
-                    pickUpTime: pickupTime,
-                    trip: tripId,
-                    noPax: noPax,
-                    airlineCode: airlineCode,
-                    flightNo: flightNo,
-                    terminal: terminal,
-                    flightSchTime: flightSchTime,
-                    newGreeterId: greeterId,
-                    greeterName: greeterName,
-                    newStatusId: 1515,
-                    statusName: "Greeter at Site",
-                                    
-                  });
-               
-              } else if(statusId == "1513" || statusId == "1515" || statusId == "1516" || statusId == "1517" || statusId == "1518") {
+                navigation.navigate("TripDetailsScreen", {
+                  passengerName: name,
+                  pickUp: pickupFrom,
+                  dropOff: dropOffAdd,
+                  pickUpTime: pickupTime,
+                  trip: tripId,
+                  noPax: noPax,
+                  airlineCode: airlineCode,
+                  flightNo: flightNo,
+                  terminal: terminal,
+                  flightSchTime: flightSchTime,
+                  newGreeterId: greeterId,
+                  greeterName: greeterName,
+                  newStatusId: 1515,
+                  statusName: "Greeter at Site",
+                });
+              } else if (
+                statusId == "1513" ||
+                statusId == "1515" ||
+                statusId == "1516" ||
+                statusId == "1517" ||
+                statusId == "1518"
+              ) {
                 navigation.navigate("TripDetailsScreen", {
                   passengerName: name,
                   pickUp: pickupFrom,
@@ -414,8 +443,8 @@ const Item = ({
                   newStatusId: statusId,
                   statusName: statusName,
                 });
-              }else{
-                 ToastAndroid.show(statusName, ToastAndroid.SHORT);
+              } else {
+                ToastAndroid.show(statusName, ToastAndroid.SHORT);
               }
             }}
           />
@@ -426,7 +455,7 @@ const Item = ({
 );
 
 export default function HomeScreen({ navigation }) {
-  const fullDate = moment(Date()).format('YYYY-MM-DD')
+  const fullDate = moment(Date()).format("YYYY-MM-DD");
 
   const [userID, setUserId] = useState();
   const [customerID, setCustomerId] = useState();
@@ -437,6 +466,10 @@ export default function HomeScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDate, setSelectedDate] = useState(fullDate);
 
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
   AsyncStorage.getItem("loginDetails").then((val) => {
     const parsed = JSON.parse(val);
@@ -445,11 +478,12 @@ export default function HomeScreen({ navigation }) {
   });
 
   const apiCall = async () => {
-    console.log("ApiCall"+" " + moment(selectedDate,"YYYY-MM-DD").format("MM/DD/YYYY"));
+    console.log(
+      "ApiCall" + " " + moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY")
+    );
     try {
       //debugger;
       const response = await fetch(
-        
         "http://132.148.73.104:8082/core/ver1.0/greeter/jobs",
         {
           method: "POST",
@@ -461,15 +495,15 @@ export default function HomeScreen({ navigation }) {
             service_provider_id: 2,
             customer_id: 4, //customerID, //changes are here
             branch_id: 1,
-            from_date: moment(selectedDate,"YYYY-MM-DD").format("MM/DD/YYYY"),
-            to_date:moment(selectedDate,"YYYY-MM-DD").format("MM/DD/YYYY"),
+            from_date: moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
+            to_date: moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
             // from_date: moment(new Date(), "YYYY-MM-DDTHH:mm:ss.sssZ").format(
             //   "MM/DD/YYYY HH:mm"
             // ),
             // to_date: moment(new Date(), "YYYY-MM-DDTHH:mm:ss.sssZ").format(
             //   "MM/DD/YYYY HH:mm"
             // ),
-            greeter_id:userID
+            greeter_id: userID,
           }),
         }
       );
@@ -485,11 +519,67 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  async function registerForPushNotificationsAsync() {
+    let token;
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        //app permission
+        console.log(finalStatus);
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+      //token = (await Notifications.getExpoPushTokenAsync()).data;
+      token = (await Notifications.getDevicePushTokenAsync()).data;
+      console.log(token);
+    } else {
+      alert("Must use physical device for Push Notifications");
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    return token;
+  }
+
   useEffect(() => {
     //isFocused
 
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        console.log(JSON.stringify(notification));
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
     apiCall();
-  }, [selectedDate,isFocused]);
+
+    // return () => {
+    //   Notifications.removeNotificationSubscription(
+    //     notificationListener.current
+    //   );
+    //   Notifications.removeNotificationSubscription(responseListener.current);
+    // };
+  }, [selectedDate, isFocused]);
 
   const getItemCount = (data) => 20;
 
@@ -567,12 +657,14 @@ export default function HomeScreen({ navigation }) {
         style={styles.container}
         horizontal={false}
       >
-              <Calendar onSelectDate={setSelectedDate} selected={selectedDate} />
+        <Calendar onSelectDate={setSelectedDate} selected={selectedDate} />
 
         <FlatList
           data={data}
           renderItem={renderItem}
-          keyExtractor={(item) => {item.booking_id}}
+          keyExtractor={(item) => {
+            item.booking_id;
+          }}
           // getItemCount={getItemCount}
           // getItem={getItem}
         />

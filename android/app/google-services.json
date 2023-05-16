@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1077823103550",
+    "project_id": "i3agent",
+    "storage_bucket": "i3agent.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077823103550:android:79bb555e007968fe1d276f",
+        "android_client_info": {
+          "package_name": "com.testios7977.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1077823103550-2ahasks56iv7no68fk654q1ehu3r51al.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCrqpWPliuMWfEGaOSpv7wCL3YJ9o8fcM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1077823103550-2ahasks56iv7no68fk654q1ehu3r51al.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
