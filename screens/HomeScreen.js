@@ -16,6 +16,7 @@ import {
   ToastAndroid,
   RefreshControl,
   Platform,
+  PermissionsAndroid,
   VirtualizedList,
 } from "react-native";
 import { Button } from "@react-native-material/core";
@@ -474,10 +475,12 @@ export default function HomeScreen({ navigation }) {
   AsyncStorage.getItem("loginDetails").then((val) => {
     const parsed = JSON.parse(val);
     setUserId(parsed.userId);
+    console.log("parsedId" + parsed.userId);
     setCustomerId(parsed.customerId);
   });
 
   const apiCall = async () => {
+    console.log("joblisting" + userID);
     console.log(
       "ApiCall" + " " + moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY")
     );
@@ -522,48 +525,65 @@ export default function HomeScreen({ navigation }) {
   async function registerForPushNotificationsAsync() {
     let token;
     if (Device.isDevice) {
+      //check existing status
       const { status: existingStatus } =
         await Notifications.getPermissionsAsync();
+
       let finalStatus = existingStatus;
+
       if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
+        //const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+
         finalStatus = status;
       }
+
       if (finalStatus !== "granted") {
         //app permission
         console.log(finalStatus);
+        requestNotificationPermission;
         alert("Failed to get push token for push notification!");
         return;
       }
       //token = (await Notifications.getExpoPushTokenAsync()).data;
       token = (await Notifications.getDevicePushTokenAsync()).data;
+      updateFCMToken(token);
       console.log(token);
     } else {
       alert("Must use physical device for Push Notifications");
     }
-
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-
+    // if (Platform.OS === "android") {
+    //   Notifications.setNotificationChannelAsync("default", {
+    //     name: "default",
+    //     importance: Notifications.AndroidImportance.MAX,
+    //     vibrationPattern: [0, 250, 250, 250],
+    //     lightColor: "#FF231F7C",
+    //   });
+    // }
     return token;
   }
 
+  const requestNotificationPermission = async () => {
+    try {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATION
+      );
+    } catch (err) {
+      if (_DEV_) console.warn("requestNotificationPermission error: ", err);
+    }
+  };
+
   useEffect(() => {
     //isFocused
-
     registerForPushNotificationsAsync().then((token) =>
       setExpoPushToken(token)
     );
 
     notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log(JSON.stringify(notification));
+      Notifications.addNotificationReceivedListener((fcmNotification) => {
+        console.log(
+          fcmNotification.request.trigger.remoteMessage.notification.title
+        );
       });
 
     responseListener.current =
@@ -572,13 +592,6 @@ export default function HomeScreen({ navigation }) {
       });
 
     apiCall();
-
-    // return () => {
-    //   Notifications.removeNotificationSubscription(
-    //     notificationListener.current
-    //   );
-    //   Notifications.removeNotificationSubscription(responseListener.current);
-    // };
   }, [selectedDate, isFocused]);
 
   const getItemCount = (data) => 20;
@@ -636,6 +649,53 @@ export default function HomeScreen({ navigation }) {
     }, 2000);
   }, []);
 
+  async function updateFCMToken(fcmToken) {
+    console.log(userID);
+    try {
+      const response = await fetch(
+        "http://132.148.73.104:8082/core/ver1.0/notification/UserAsset",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: 0,
+            user_id: userID, //required
+            asset_id: "`0`",
+            asset_type: "0",
+            asset_make: "0",
+            asset_model: "0",
+            asset_mfg_name: "0",
+            asset_name: "0",
+            asset_imie: "123456789", //required
+            asset_os_version: "1.0", //required
+            data_state: "0",
+            geolocation_status: "0",
+            application_name: "Greeter App",
+            application_version: "0",
+            browser_name: "0",
+            browser_version: "0",
+            application_type_id: 0,
+            firebase_token: fcmToken, //required
+            firebase_token_created_at: moment(
+              selectedDate,
+              "YYYY-MM-DD"
+            ).format("MM/DD/YYYY"),
+          }),
+        }
+      );
+      const statuscode = response.status;
+
+      if (statuscode === 200) {
+        const json = await response.json();
+        console.log("ApiFCMTokenUpdate", json);
+      }
+    } catch (error) {
+      console.log("ApiFCMTokenUpdate error", error);
+    } finally {
+    }
+  }
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flexDirection: "row", backgroundColor: "black" }}>
