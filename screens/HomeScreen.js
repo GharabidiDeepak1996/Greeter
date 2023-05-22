@@ -531,7 +531,6 @@ export default function HomeScreen({ navigation }) {
           "FCMData--> ",
           fcmNotification.request.trigger.remoteMessage
         );
-        handleNewNotification(fcmNotification.request.trigger.remoteMessage);
       });
 
     responseListener.current =
