@@ -434,29 +434,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const registerForPushNotificationsAsync = async () => {
-  try {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      throw new Error("Permission not granted!");
-    }
-    console.log("checkPermission", finalStatus);
-    //const token = (await Notifications.getExpoPushTokenAsync()).data;
-    const token = (await Notifications.getDevicePushTokenAsync()).data;
-    console.log("expo token", token);
-
-    return token;
-  } catch (error) {
-    console.log("error", error);
-    console.error(error);
-  }
-};
 
 export default function HomeScreen({ navigation }) {
   const fullDate = moment(Date()).format("YYYY-MM-DD");
@@ -469,6 +446,9 @@ export default function HomeScreen({ navigation }) {
   const [selectedDate, setSelectedDate] = useState(fullDate);
   const notificationListener = useRef();
   const responseListener = useRef();
+  const [longitudeLocation,setLongitudeLocation] = useRef();
+  const [latitudeLocation,setLatitudeLocation] = useRef();
+
 
   AsyncStorage.getItem("loginDetails").then((val) => {
     const parsed = JSON.parse(val);
@@ -477,6 +457,32 @@ export default function HomeScreen({ navigation }) {
     setCustomerId(parsed.customerId);
   });
 
+
+  const registerForPushNotificationsAsync = async () => {
+    try {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        throw new Error("Permission not granted!");
+      }
+      console.log("checkPermission", finalStatus);
+     // const token = (await Notifications.getExpoPushTokenAsync()).data;
+       const token = (await Notifications.getDevicePushTokenAsync()).data;
+      console.log("expo token", token);
+  
+      updateFCMToken(token)
+      
+      return token;
+    } catch (error) {
+      console.log("error", error);
+      console.error(error);
+    }
+  };
   const apiCall = async () => {
     console.log("joblisting" + userID);
     console.log(
@@ -522,8 +528,10 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     apiCall();
+   // getLocationAsync()
+    registerForPushNotificationsAsync().then((token) =>{
 
-    registerForPushNotificationsAsync();
+    })
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener(async (fcmNotification) => {
@@ -533,6 +541,7 @@ export default function HomeScreen({ navigation }) {
         );
       });
 
+      //
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log(response);
