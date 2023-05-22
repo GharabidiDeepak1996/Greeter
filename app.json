@@ -1,24 +1,8 @@
 {
   "expo": {
-    "name": "greeter",
+    "name": "Greeter",
     "slug": "greeter",
-    "scheme": "com.testios7977.demo",
-    "notification": {
-      "icon": "./assets/favicon.png"
-    },
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "../assets/favicon.png",
-          "color": "#CA2C92",
-          "sounds": [],
-          "androidMode": "default",
-          "androidCollapsedTitle": "Greeter",
-          "iosDisplayInForeground": true
-        }
-      ]
-    ],
+
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,19 +12,16 @@
       "supportsTablet": true
     },
     "android": {
-      "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": true,
-      "enableDangerousExperimentalLeanBuilds": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
       "package": "com.testios7977.demo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "18b84ceb-22d5-4cab-8d9a-425c30988ee2"
-      }
-    },
+
     "owner": "testios7977"
   }
 }

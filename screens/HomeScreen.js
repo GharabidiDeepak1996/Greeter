@@ -4,11 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import * as Location from "expo-location";
-//import * as TaskManager from "expo-task-manager";
-
-//const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-
-//import * as Permissions from "expo-permissions";
 
 import {
   SafeAreaView,
@@ -28,55 +23,6 @@ import { useIsFocused } from "@react-navigation/native";
 import moment from "moment";
 import { format } from "date-fns";
 import Calendar from "../components/Calender";
-
-Notifications.setNotificationHandler({
-  handleNotification: async (notification) => {
-    console.log("handling a notification", notification);
-
-    return {
-      shouldShowAlert: true,
-      //  shouldPlaySound: true,
-      //  shouldSetBadge: true,
-    };
-  },
-  handleSuccess: (notificationId) =>
-    console.log(`Notification ${notificationId} successfully handled.`),
-  handleError: (notificationId, error) =>
-    console.log(
-      `Notification ${notificationId} wasn't successfully handled.`,
-      error
-    ),
-});
-
-const DATA = [
-  {
-    id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-    name: "Pratik Maske",
-    pickupFrom: "BOM Airport",
-    noOfPickups: "3",
-    dropOffAdd: "CSMT Station",
-    pickUpTime: "4:30 PM",
-    contact: "8433681861",
-  },
-  {
-    id: "bd7acbea-c1b1-46c2-aed5-d53abb28ba",
-    name: "Deepak Gharabidi",
-    pickupFrom: "Orient House, Fort, Mumbai",
-    noOfPickups: "2",
-    dropOffAdd: "Kurla Station",
-    pickUpTime: "5:30 PM",
-    contact: "8433681861",
-  },
-  {
-    id: "bd7acbea-c1b1-46c2ed5-3ad53abb28ba",
-    name: "Aboli Mane",
-    pickupFrom: "Orient House, Fort, Mumbai",
-    noOfPickups: "4",
-    dropOffAdd: "Kalyan Station",
-    pickUpTime: "5:40 PM",
-    contact: "8433681861",
-  },
-];
 
 const jobStatus = async (
   statusid,
@@ -480,28 +426,37 @@ const Item = ({
   </View>
 );
 
-const handleNewNotification = async (notificationObject) => {
-  console.log("handleNewNotification ->", notificationObject);
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
+const registerForPushNotificationsAsync = async () => {
   try {
-    const newNotification = {
-      id: notificationObject.messageId,
-      date: notificationObject.sentTime,
-      title: notificationObject.messageId,
-      body: notificationObject.collapseKey,
-      // data: JSON.parse(notificationObject.notification.body),
-    };
-    // add the code to do what you need with the received notification  and, e.g., set badge number on app icon
-    console.log("handleNewNotification125ew", newNotification);
-    await Notifications.setBadgeCountAsync(1);
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== "granted") {
+      throw new Error("Permission not granted!");
+    }
+    console.log("checkPermission", finalStatus);
+    //const token = (await Notifications.getExpoPushTokenAsync()).data;
+    const token = (await Notifications.getDevicePushTokenAsync()).data;
+    console.log("expo token", token);
+
+    return token;
   } catch (error) {
+    console.log("error", error);
     console.error(error);
   }
 };
-
-// TaskManager.defineTask(
-//   BACKGROUND_NOTIFICATION_TASK,
-//   ({ data, error, executionInfo }) => handleNewNotification(data.notification)
-// );
 
 export default function HomeScreen({ navigation }) {
   const fullDate = moment(Date()).format("YYYY-MM-DD");
@@ -510,13 +465,8 @@ export default function HomeScreen({ navigation }) {
   const [customerID, setCustomerId] = useState();
   const [data, setData] = useState([]);
   const isFocused = useIsFocused();
-  const [addressTitle, setAddressTitle] = useState("");
-  const [addressSubTitle, setAddressSubTitle] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDate, setSelectedDate] = useState(fullDate);
-
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
 
@@ -570,77 +520,18 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  async function registerForPushNotificationsAsync() {
-    let token;
-
-    // if (Platform.OS === "android") {
-    //   await Notifications.setNotificationCategoryAsync("basic", {
-    //     name: "default",
-    //     importance: Notifications.AndroidImportance.MAX,
-    //     sound: "default",
-    //     vibrationPattern: [0, 250, 500, 250],
-    //     lightColor: "#FF231F7C",
-    //   });
-    // }
-
-    if (Device.isDevice) {
-      //check existing status
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-
-      let finalStatus = existingStatus;
-
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-
-      if (finalStatus !== "granted") {
-        //app permission
-        console.log(finalStatus);
-        alert("Failed to get push token for push notification!");
-        return;
-      }
-      // token = (await Notifications.getExpoPushTokenAsync()).data;
-      let token2 = (await Notifications.getDevicePushTokenAsync()).data;
-      console.log("fcm token", token2);
-      token = (await Notifications.getExpoPushTokenAsync(token2)).data;
-
-      updateFCMToken(token);
-      console.log("expo token", token);
-    } else {
-      alert("Must use physical device for Push Notifications");
-    }
-    // some android configuration
-    // if (Platform.OS === "android") {
-    //   Notifications.setNotificationChannelAsync("default", {
-    //     name: "default",
-    //     importance: Notifications.AndroidImportance.MAX,
-    //     vibrationPattern: [0, 250, 250, 250],
-    //     lightColor: "#FF231F7C",
-    //   });
-    // }
-    return token;
-  }
-
   useEffect(() => {
-    //isFocused
-    registerForPushNotificationsAsync().then((token) =>
-      setExpoPushToken(token)
-    );
+    apiCall();
 
-    //Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+    registerForPushNotificationsAsync();
 
     notificationListener.current =
-      // const foregroundReceivedNotificationSubscription =
       Notifications.addNotificationReceivedListener(async (fcmNotification) => {
         console.log(
           "FCMData--> ",
           fcmNotification.request.trigger.remoteMessage
         );
         handleNewNotification(fcmNotification.request.trigger.remoteMessage);
-
-        // fcmNotification.request.trigger.remoteMessage.notification.title
       });
 
     responseListener.current =
@@ -648,50 +539,11 @@ export default function HomeScreen({ navigation }) {
         console.log(response);
       });
 
-    apiCall();
-    // The listeners must be clear on app unmount
     return () => {
-      // cleanup the listener and task registry
-      //  foregroundReceivedNotificationSubscription.remove();
-      //  Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);
     };
   }, [selectedDate, isFocused]);
-  ``;
-  const notificationCommonHandler = (notification) => {
-    console.log("FCMData546--> ", notification);
-    // Notifications.setNotificationHandler({
-    //   handleNotification: async (notification) => {
-    //     console.log("handling a notification", notification);
-
-    //     return {
-    //       shouldShowAlert: true,
-    //       shouldPlaySound: true,
-    //       shouldSetBadge: true,
-    //     };
-    //   },
-    //   handleSuccess: (notificationId) =>
-    //     console.log(`Notification ${notificationId} successfully handled.`),
-    //   handleError: (notificationId, error) =>
-    //     console.log(
-    //       `Notification ${notificationId} wasn't successfully handled.`,
-    //       error
-    //     ),
-    // });
-
-    // save the notification to reac-redux store
-    console.log("FCMNotificationData--->", notification.request);
-  };
-
-  const getItemCount = (data) => 20;
-
-  const getItem = (data, index) => ({
-    key: index,
-    id: Math.random().toString(12).substring(0),
-    title: "test",
-  });
 
   const renderItem = ({ item, index }) => {
     return (
@@ -811,6 +663,7 @@ export default function HomeScreen({ navigation }) {
       }
     }
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flexDirection: "row", backgroundColor: "black" }}>
