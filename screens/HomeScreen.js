@@ -3,6 +3,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import * as Location from "expo-location";
+//import * as TaskManager from "expo-task-manager";
+
+//const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+//import * as Permissions from "expo-permissions";
 
 import {
   SafeAreaView,
@@ -12,12 +18,9 @@ import {
   StyleSheet,
   Text,
   Linking,
-  StatusBar,
   ToastAndroid,
   RefreshControl,
   Platform,
-  PermissionsAndroid,
-  VirtualizedList,
 } from "react-native";
 import { Button } from "@react-native-material/core";
 import MaterialCommunityIcons from "react-native-vector-icons/Ionicons";
@@ -25,6 +28,25 @@ import { useIsFocused } from "@react-navigation/native";
 import moment from "moment";
 import { format } from "date-fns";
 import Calendar from "../components/Calender";
+
+Notifications.setNotificationHandler({
+  handleNotification: async (notification) => {
+    console.log("handling a notification", notification);
+
+    return {
+      shouldShowAlert: true,
+      //  shouldPlaySound: true,
+      //  shouldSetBadge: true,
+    };
+  },
+  handleSuccess: (notificationId) =>
+    console.log(`Notification ${notificationId} successfully handled.`),
+  handleError: (notificationId, error) =>
+    console.log(
+      `Notification ${notificationId} wasn't successfully handled.`,
+      error
+    ),
+});
 
 const DATA = [
   {
@@ -56,37 +78,12 @@ const DATA = [
   },
 ];
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
-
-// Can use this function below OR use Expo's Push Notification Tool from: https://expo.dev/notifications
-async function sendPushNotification(expoPushToken) {
-  const message = {
-    to: expoPushToken,
-    sound: "default",
-    title: "Original Title",
-    body: "And here is the body!",
-    data: { someData: "goes here" },
-  };
-
-  await fetch("https://exp.host/--/api/v2/push/send", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Accept-encoding": "gzip, deflate",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(message),
-  });
-}
-
-function textFormate() {}
-const jobStatus = async (statusid, tripId) => {
+const jobStatus = async (
+  statusid,
+  tripId,
+  latitudeLocation,
+  longitudeLocation
+) => {
   try {
     const response = await fetch(
       "http://132.148.73.104:8082/core/ver1.0/greeter/job/status",
@@ -103,8 +100,8 @@ const jobStatus = async (statusid, tripId) => {
             "MM/DD/YYYY HH:mm"
           ),
           status_Id: parseInt(statusid),
-          latitude: 15.0,
-          longitude: 87.36,
+          latitude: latitudeLocation,
+          longitude: longitudeLocation,
         }),
       }
     );
@@ -402,8 +399,36 @@ const Item = ({
             title="Start Job"
             style={styles.materialButtonPrimary}
             onPress={() => {
+              let latitudeLocation, longitudeLocation;
+
+              async () => {
+                let { status } =
+                  await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                  Linking.openSettings();
+                  console.log("user side", "decline");
+                } else {
+                  try {
+                    let location = await Location.getCurrentPositionAsync({});
+
+                    latitudeLocation = location.coords.latitude;
+                    longitudeLocation = location.coords.longitude;
+                    // setLongitudeLocation(location.coords.longitude);
+                    // setLatitudeLocation(location.coords.latitude);
+
+                    //  console.log("user location-->", location.coords.latitude);
+                    // do something with location
+                  } catch (e) {
+                    alert(
+                      "We could not find your position. Please make sure your location service provider is on"
+                    );
+                    console.log("Error while trying to get location: ", e);
+                  }
+                }
+              };
+
               if (statusId == "1512") {
-                jobStatus(1513, tripId);
+                jobStatus(1513, tripId, latitudeLocation, longitudeLocation);
 
                 navigation.navigate("TripDetailsScreen", {
                   passengerName: name,
@@ -454,6 +479,29 @@ const Item = ({
     </View>
   </View>
 );
+
+const handleNewNotification = async (notificationObject) => {
+  console.log("handleNewNotification ->", notificationObject);
+  try {
+    const newNotification = {
+      id: notificationObject.messageId,
+      date: notificationObject.sentTime,
+      title: notificationObject.messageId,
+      body: notificationObject.collapseKey,
+      // data: JSON.parse(notificationObject.notification.body),
+    };
+    // add the code to do what you need with the received notification  and, e.g., set badge number on app icon
+    console.log("handleNewNotification125ew", newNotification);
+    await Notifications.setBadgeCountAsync(1);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// TaskManager.defineTask(
+//   BACKGROUND_NOTIFICATION_TASK,
+//   ({ data, error, executionInfo }) => handleNewNotification(data.notification)
+// );
 
 export default function HomeScreen({ navigation }) {
   const fullDate = moment(Date()).format("YYYY-MM-DD");
@@ -524,6 +572,17 @@ export default function HomeScreen({ navigation }) {
 
   async function registerForPushNotificationsAsync() {
     let token;
+
+    // if (Platform.OS === "android") {
+    //   await Notifications.setNotificationCategoryAsync("basic", {
+    //     name: "default",
+    //     importance: Notifications.AndroidImportance.MAX,
+    //     sound: "default",
+    //     vibrationPattern: [0, 250, 500, 250],
+    //     lightColor: "#FF231F7C",
+    //   });
+    // }
+
     if (Device.isDevice) {
       //check existing status
       const { status: existingStatus } =
@@ -533,25 +592,26 @@ export default function HomeScreen({ navigation }) {
 
       if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
-        //const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-
         finalStatus = status;
       }
 
       if (finalStatus !== "granted") {
         //app permission
         console.log(finalStatus);
-        requestNotificationPermission;
         alert("Failed to get push token for push notification!");
         return;
       }
-      //token = (await Notifications.getExpoPushTokenAsync()).data;
-      token = (await Notifications.getDevicePushTokenAsync()).data;
+      // token = (await Notifications.getExpoPushTokenAsync()).data;
+      let token2 = (await Notifications.getDevicePushTokenAsync()).data;
+      console.log("fcm token", token2);
+      token = (await Notifications.getExpoPushTokenAsync(token2)).data;
+
       updateFCMToken(token);
-      console.log(token);
+      console.log("expo token", token);
     } else {
       alert("Must use physical device for Push Notifications");
     }
+    // some android configuration
     // if (Platform.OS === "android") {
     //   Notifications.setNotificationChannelAsync("default", {
     //     name: "default",
@@ -563,27 +623,24 @@ export default function HomeScreen({ navigation }) {
     return token;
   }
 
-  const requestNotificationPermission = async () => {
-    try {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATION
-      );
-    } catch (err) {
-      if (_DEV_) console.warn("requestNotificationPermission error: ", err);
-    }
-  };
-
   useEffect(() => {
     //isFocused
     registerForPushNotificationsAsync().then((token) =>
       setExpoPushToken(token)
     );
 
+    //Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
     notificationListener.current =
-      Notifications.addNotificationReceivedListener((fcmNotification) => {
+      // const foregroundReceivedNotificationSubscription =
+      Notifications.addNotificationReceivedListener(async (fcmNotification) => {
         console.log(
-          fcmNotification.request.trigger.remoteMessage.notification.title
+          "FCMData--> ",
+          fcmNotification.request.trigger.remoteMessage
         );
+        handleNewNotification(fcmNotification.request.trigger.remoteMessage);
+
+        // fcmNotification.request.trigger.remoteMessage.notification.title
       });
 
     responseListener.current =
@@ -592,7 +649,41 @@ export default function HomeScreen({ navigation }) {
       });
 
     apiCall();
+    // The listeners must be clear on app unmount
+    return () => {
+      // cleanup the listener and task registry
+      //  foregroundReceivedNotificationSubscription.remove();
+      //  Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
+      Notifications.removeNotificationSubscription(notificationListener);
+      Notifications.removeNotificationSubscription(responseListener);
+    };
   }, [selectedDate, isFocused]);
+  ``;
+  const notificationCommonHandler = (notification) => {
+    console.log("FCMData546--> ", notification);
+    // Notifications.setNotificationHandler({
+    //   handleNotification: async (notification) => {
+    //     console.log("handling a notification", notification);
+
+    //     return {
+    //       shouldShowAlert: true,
+    //       shouldPlaySound: true,
+    //       shouldSetBadge: true,
+    //     };
+    //   },
+    //   handleSuccess: (notificationId) =>
+    //     console.log(`Notification ${notificationId} successfully handled.`),
+    //   handleError: (notificationId, error) =>
+    //     console.log(
+    //       `Notification ${notificationId} wasn't successfully handled.`,
+    //       error
+    //     ),
+    // });
+
+    // save the notification to reac-redux store
+    console.log("FCMNotificationData--->", notification.request);
+  };
 
   const getItemCount = (data) => 20;
 
@@ -651,6 +742,7 @@ export default function HomeScreen({ navigation }) {
 
   async function updateFCMToken(fcmToken) {
     console.log(userID);
+    console.log(fcmToken);
     try {
       const response = await fetch(
         "http://132.148.73.104:8082/core/ver1.0/notification/UserAsset",
@@ -668,8 +760,8 @@ export default function HomeScreen({ navigation }) {
             asset_model: "0",
             asset_mfg_name: "0",
             asset_name: "0",
-            asset_imie: "123456789", //required
-            asset_os_version: "1.0", //required
+            asset_imie: Device.osBuildId, //required
+            asset_os_version: Device.osVersion, //required
             data_state: "0",
             geolocation_status: "0",
             application_name: "Greeter App",
@@ -696,6 +788,29 @@ export default function HomeScreen({ navigation }) {
     } finally {
     }
   }
+
+  const getLocationAsync = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Linking.openSettings();
+      console.log("user side", "decline");
+    } else {
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+
+        setLongitudeLocation(location.coords.longitude);
+        setLatitudeLocation(location.coords.latitude);
+
+        console.log("user location-->", location.coords.latitude);
+        // do something with location
+      } catch (e) {
+        alert(
+          "We could not find your position. Please make sure your location service provider is on"
+        );
+        console.log("Error while trying to get location: ", e);
+      }
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flexDirection: "row", backgroundColor: "black" }}>
