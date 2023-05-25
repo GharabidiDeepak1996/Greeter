@@ -15,7 +15,7 @@ import {
   Linking,
   ToastAndroid,
   RefreshControl,
-  Platform,
+  Alert,
 } from "react-native";
 import { Button } from "@react-native-material/core";
 import MaterialCommunityIcons from "react-native-vector-icons/Ionicons";
@@ -24,466 +24,87 @@ import moment from "moment";
 import { format } from "date-fns";
 import Calendar from "../components/Calender";
 
-const jobStatus = async (
-  statusid,
-  tripId,
-  latitudeLocation,
-  longitudeLocation
-) => {
-  try {
-    const response = await fetch(
-      "http://132.148.73.104:8082/core/ver1.0/greeter/job/status",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          trip_id: parseInt(tripId),
-          greeter_id: 0,
-          status_time: moment(new Date(), "YYYY-MM-DDTHH:mm:ss.sssZ").format(
-            "MM/DD/YYYY HH:mm"
-          ),
-          status_Id: parseInt(statusid),
-          latitude: latitudeLocation,
-          longitude: longitudeLocation,
-        }),
-      }
-    );
-
-    const statusCode = response.status;
-    const json = await response.json();
-
-    if (statusCode == 200) {
-      if (json.isSuccess == true) {
-        //window.location.reload(false);
-      } else {
-        ToastAndroid.show(json.resultMessage, ToastAndroid.SHORT);
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-  }
-};
-
-const Item = ({
-  bookingId,
-  tripId,
-  companyId,
-  branchId,
-  customerId,
-  customerName,
-  serviceType,
-  pickupTime,
-  noPax,
-  pickupNotes,
-  title,
-  name,
-  mobile,
-  email,
-  airlineCode,
-  flightNo,
-  terminal,
-  flightSchTime,
-  commissionAgentId,
-  greeterId,
-  greeterName,
-  statusId,
-  statusName,
-  onSiteTime,
-  boardTime,
-  pickupFrom,
-  dropOffAdd,
-  // name,
-  // pickupFrom,
-  // noOfPickups,
-  // dropOffAdd,
-  // pickUpTime,
-  // contact,
-  // flightNo,
-  // gate,
-  // terminal,
-  navigation,
-}) => (
-  <View key={tripId} style={styles.containerNew}>
-    {/* <View
-      style={{
-        backgroundColor: "#000000",
-        borderTopEndRadius: 8,
-        borderTopStartRadius: 8,
-        padding: 7,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: "bold",
-          color: "white",
-          marginStart: 3,
-        }}
-      >
-        Web Meet and Greet
-      </Text>
-    </View> */}
-
-    {/* top label */}
-    <View
-      style={{
-        flexDirection: "row",
-        borderTopEndRadius: 8,
-        borderTopStartRadius: 8,
-
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        elevation: 0,
-
-        backgroundColor: "black",
-      }}
-    >
-      <View>
-        <View style={{ flexDirection: "row" }}>
-          {/* <MaterialCommunityIcons
-            name={"person-outline"}
-            color={"white"}
-            size={17}
-            style={{ justifyContent: "center", top: 5, marginRight: 5 }}
-          /> */}
-          <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
-            {name}
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: "row" }}>
-          <MaterialCommunityIcons
-            name={"business-outline"}
-            color={"gray"}
-            size={17}
-            style={{ justifyContent: "center", marginRight: 5 }}
-          />
-          <Text
-            style={{
-              fontSize: 16,
-              color: "gray",
-              fontWeight: "400",
-            }}
-          >
-            {customerName}
-          </Text>
-        </View>
-      </View>
-
-      <View
-        style={{
-          alignItems: "flex-end",
-          flex: 1,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 18,
-            marginStart: 6,
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
-          {noPax}{" "}
-          <Text
-            style={{
-              fontSize: 18,
-              marginStart: 6,
-              color: "white",
-              fontWeight: "400",
-            }}
-          >
-            Pax
-          </Text>
-        </Text>
-        <Text style={{ fontSize: 16, color: "gray" }}>{"# " + tripId}</Text>
-      </View>
-    </View>
-
-    <View style={{ width: "100%", height: 1, backgroundColor: "#D3D3D3" }} />
-
-    {/* //middle label */}
-    <View
-      style={{
-        paddingHorizontal: 15,
-        paddingTop: 10,
-        paddingBottom: 5,
-      }}
-    >
-      <View style={styles.namePaxContainer}>
-        <View style={{ flexDirection: "column" }}>
-          <View style={{ paddingBottom: 14 }}>
-            <Text style={styles.infoLabel}>PICK-UP</Text>
-            <Text style={styles.title}>{pickupFrom}</Text>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={{ color: "#5A5A5A" }}>Fight :</Text>
-              <Text style={{ color: "#5A5A5A" }}> {flightNo}</Text>
-              <View
-                style={{
-                  borderWidth: 2.5,
-                  height: 3,
-                  borderRadius: 1,
-                  marginStart: 5,
-                  alignSelf: "center",
-                  borderColor: "#5A5A5A",
-                }}
-              ></View>
-              <Text style={{ color: "#5A5A5A" }}> Gate :</Text>
-              <Text style={{ color: "#5A5A5A" }}> -</Text>
-              <View
-                style={{
-                  borderWidth: 2.5,
-                  height: 3,
-                  borderRadius: 1,
-                  marginStart: 5,
-                  alignSelf: "center",
-                  backgroundColor: "#5A5A5A",
-                  borderColor: "#5A5A5A",
-                }}
-              ></View>
-              <Text style={{ color: "#5A5A5A" }}> Terminal :</Text>
-              <Text style={{ color: "#5A5A5A" }}> -</Text>
-            </View>
-            {/* <Text style={styles.flightDetails}>
-              <Text>
-                <Text>{flightNo} |</Text> {terminal}{" "}
-              </Text>{" "}
-              {""}
-            </Text> */}
-          </View>
-        </View>
-
-        <View
-          style={{
-            alignItems: "flex-end",
-            flex: 1,
-          }}
-        >
-          <View>
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-              {pickupTime}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <View>
-        <Text style={styles.containerDropoffText}>DROP OFF</Text>
-        <Text style={styles.airlineNameText}>
-          {dropOffAdd.split(",").shift()}
-        </Text>
-        <Text style={styles.airlineDetailsText}>
-          {dropOffAdd.slice(dropOffAdd.indexOf(",") + 1).trim()}
-        </Text>
-      </View>
-    </View>
-
-    <View>
-      <View
-        style={{
-          flexDirection: "row",
-          flex: 1,
-          justifyContent: "space-around",
-          paddingHorizontal: 15,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            borderWidth: 1,
-            borderColor: "#979797",
-            borderRadius: 25,
-            marginEnd: 8,
-            justifyContent: "center",
-            alignItems: "center",
-            marginVertical: 12,
-          }}
-        >
-          <Text
-            style={{
-              fontWeight: "500",
-              marginEnd: 10,
-              marginStart: 10,
-              color: "black",
-              textAlign: "center",
-              textAlignVertical: "center",
-              fontSize: 15,
-              textTransform: "uppercase",
-            }}
-            onPress={() => {
-              Linking.openURL("tel:" + mobile);
-            }}
-          >
-            {mobile}
-          </Text>
-
-          <View
-            style={{
-              height: 35,
-              width: 35,
-              backgroundColor: "seagreen",
-              borderRadius: 30,
-              justifyContent: "center",
-            }}
-          >
-            <MaterialCommunityIcons
-              name={"ios-call"}
-              color={"white"}
-              size={17}
-              style={{ alignSelf: "center" }}
-            />
-          </View>
-        </View>
-
-        <View style={{ flex: 1 }}>
-          <Button
-            title="Start Job"
-            style={styles.materialButtonPrimary}
-            onPress={() => {
-              let latitudeLocation, longitudeLocation;
-
-              async () => {
-                let { status } =
-                  await Location.requestForegroundPermissionsAsync();
-                if (status !== "granted") {
-                  Linking.openSettings();
-                  console.log("user side", "decline");
-                } else {
-                  try {
-                    let location = await Location.getCurrentPositionAsync({});
-
-                    latitudeLocation = location.coords.latitude;
-                    longitudeLocation = location.coords.longitude;
-                    // setLongitudeLocation(location.coords.longitude);
-                    // setLatitudeLocation(location.coords.latitude);
-
-                    //  console.log("user location-->", location.coords.latitude);
-                    // do something with location
-                  } catch (e) {
-                    alert(
-                      "We could not find your position. Please make sure your location service provider is on"
-                    );
-                    console.log("Error while trying to get location: ", e);
-                  }
-                }
-              };
-
-              if (statusId == "1512") {
-                jobStatus(1513, tripId, latitudeLocation, longitudeLocation);
-
-                navigation.navigate("TripDetailsScreen", {
-                  passengerName: name,
-                  pickUp: pickupFrom,
-                  dropOff: dropOffAdd,
-                  pickUpTime: pickupTime,
-                  trip: tripId,
-                  noPax: noPax,
-                  airlineCode: airlineCode,
-                  flightNo: flightNo,
-                  terminal: terminal,
-                  flightSchTime: flightSchTime,
-                  newGreeterId: greeterId,
-                  greeterName: greeterName,
-                  newStatusId: 1515,
-                  statusName: "Greeter at Site",
-                });
-              } else if (
-                statusId == "1513" ||
-                statusId == "1515" ||
-                statusId == "1516" ||
-                statusId == "1517" ||
-                statusId == "1518"
-              ) {
-                navigation.navigate("TripDetailsScreen", {
-                  passengerName: name,
-                  pickUp: pickupFrom,
-                  dropOff: dropOffAdd,
-                  pickUpTime: pickupTime,
-                  trip: tripId,
-                  noPax: noPax,
-                  airlineCode: airlineCode,
-                  flightNo: flightNo,
-                  terminal: terminal,
-                  flightSchTime: flightSchTime,
-                  newGreeterId: greeterId,
-                  greeterName: greeterName,
-                  newStatusId: statusId,
-                  statusName: statusName,
-                });
-              } else {
-                ToastAndroid.show(statusName, ToastAndroid.SHORT);
-              }
-            }}
-          />
-        </View>
-      </View>
-    </View>
-  </View>
-);
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
-
-const registerForPushNotificationsAsync = async () => {
-  try {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      throw new Error("Permission not granted!");
-    }
-    console.log("checkPermission", finalStatus);
-    //const token = (await Notifications.getExpoPushTokenAsync()).data;
-    const token = (await Notifications.getDevicePushTokenAsync()).data;
-    console.log("expo token", token);
-
-    return token;
-  } catch (error) {
-    console.log("error", error);
-    console.error(error);
-  }
-};
-
 export default function HomeScreen({ navigation }) {
   const fullDate = moment(Date()).format("YYYY-MM-DD");
 
-  const [userID, setUserId] = useState();
+  const [userID, setUserId] = useState(null);
   const [customerID, setCustomerId] = useState();
-  const [data, setData] = useState([]);
+  const [greeterJob, setGreeterJob] = useState([]);
+  const [greeterNoJob, setGreeterNoJob] = useState("");
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDate, setSelectedDate] = useState(fullDate);
   const notificationListener = useRef();
   const responseListener = useRef();
+  const [statusID, setStatusID] = useState("");
+  const [longitudeLocation, setLongitudeLocation] = useState();
+  const [latitudeLocation, setLatitudeLocation] = useState();
 
-  AsyncStorage.getItem("loginDetails").then((val) => {
-    const parsed = JSON.parse(val);
-    setUserId(parsed.userId);
-    console.log("parsedId" + parsed.userId);
-    setCustomerId(parsed.customerId);
-  });
+  const buttonStatus = (buttonName) => {
+    if (buttonName == "Greeter Assigned") {
+      //1511
+      return "Accept Job";
+    }
+    if (buttonName == "Greeter Acknoledged") {
+      //1512
+      return "Start Job";
+    }
+    if (buttonName == "Greeter Accepted") {
+      //1513
+      return "onGoing job";
+    }
+    return null;
+  };
 
-  const apiCall = async () => {
-    console.log("joblisting" + userID);
-    console.log(
-      "ApiCall" + " " + moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY")
-    );
+  const jobStatus = async (statusid, tripId) => {
     try {
-      //debugger;
+      const response = await fetch(
+        "http://132.148.73.104:8082/core/ver1.0/greeter/job/status",
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            trip_id: parseInt(tripId),
+            greeter_id: 0,
+            status_time: moment(new Date(), "YYYY-MM-DDTHH:mm:ss.sssZ").format(
+              "MM/DD/YYYY HH:mm"
+            ),
+            status_Id: parseInt(statusid),
+            latitude: latitudeLocation,
+            longitude: longitudeLocation,
+          }),
+        }
+      );
+
+      const statusCode = response.status;
+      const json = await response.json();
+
+      if (statusCode == 200) {
+        if (json.isSuccess == true) {
+          setStatusID(json.resultMessage);
+          //window.location.reload(false);
+        } else {
+          ToastAndroid.show(json.resultMessage, ToastAndroid.SHORT);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+    }
+  };
+
+  const apiCall = async (userId) => {
+    console.log(
+      "DateCurrent",
+      moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
+      "userid--",
+      userId
+    );
+
+    try {
       const response = await fetch(
         "http://132.148.73.104:8082/core/ver1.0/greeter/jobs",
         {
@@ -504,24 +125,70 @@ export default function HomeScreen({ navigation }) {
             // to_date: moment(new Date(), "YYYY-MM-DDTHH:mm:ss.sssZ").format(
             //   "MM/DD/YYYY HH:mm"
             // ),
-            greeter_id: userID,
+            greeter_id: userId,
           }),
         }
       );
       const statuscode = response.status;
       if (statuscode === 200) {
         const json = await response.json();
-        var date = new Date("2016-01-04 10:34:23");
 
-        setData(json.greeterJob);
+        if (json.greeterJob.length > 0) {
+          setGreeterJob(json.greeterJob);
+        } else {
+          setGreeterNoJob("No Job Assign");
+          setGreeterJob(json.greeterJob);
+        }
+        console.log("jobListGreeter", json.greeterJob.length);
       }
     } catch (error) {
+      console.log("jobListError", error);
     } finally {
     }
   };
 
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+  });
+
+  const registerForPushNotificationsAsync = async () => {
+    try {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        throw new Error("Permission not granted!");
+      }
+      console.log("checkPermission", finalStatus);
+      //const token = (await Notifications.getExpoPushTokenAsync()).data;
+      const token = (await Notifications.getDevicePushTokenAsync()).data;
+      updateFCMToken(token);
+      console.log("expo token", token);
+
+      return token;
+    } catch (error) {
+      console.log("error", error);
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    apiCall();
+    AsyncStorage.getItem("loginDetails").then(async (val) => {
+      const parsed = await JSON.parse(val);
+      setUserId(parsed.userId);
+      setCustomerId(parsed.customerId);
+
+      apiCall(parsed.userId);
+      console.log("asyncStorage", userID);
+    });
 
     registerForPushNotificationsAsync();
 
@@ -542,51 +209,357 @@ export default function HomeScreen({ navigation }) {
       Notifications.removeNotificationSubscription(notificationListener);
       Notifications.removeNotificationSubscription(responseListener);
     };
-  }, [selectedDate, isFocused]);
+  }, [selectedDate, isFocused, refreshing, statusID]);
 
   const renderItem = ({ item, index }) => {
+    getLocationAsync();
+
     return (
-      <View>
-        <Item
-          bookingId={item.booking_id}
-          tripId={item.trip_id}
-          companyId={item.company_id}
-          branchId={item.branch_id}
-          customerId={item.customer_id}
-          customerName={item.customer_name}
-          serviceType={item.service_type}
-          pickupTime={moment(item.pickup_time, "dd/mm/yyyy HH:mm:ss").format(
-            "HH:mm"
-          )}
-          noPax={item.no_of_pax}
-          pickupNotes={item.pickup_notes}
-          title={item.title}
-          name={item.title + "" + item.first_name + "" + item.last_name}
-          mobile={item.mobile}
-          email={item.email}
-          airlineCode={item.airline_code}
-          flightNo={item.flight_no}
-          terminal={item.terminal}
-          flightSchTime={item.flight_sch_time}
-          commissionAgentId={item.commission_agent_id}
-          greeterId={item.greeter_id}
-          greeterName={item.greeter_name}
-          statusId={item.status_id}
-          statusName={item.status_name}
-          onSiteTime={item.on_site_time}
-          boardTime={item.board_time}
-          pickupFrom={item.pickup_address}
-          dropOffAdd={item.dropoff_address}
-          navigation={navigation}
+      <View key={item.trip_id} style={styles.containerNew}>
+        {/* top label */}
+        <View
+          style={{
+            flexDirection: "row",
+            borderTopEndRadius: 8,
+            borderTopStartRadius: 8,
+            paddingHorizontal: 15,
+            paddingVertical: 10,
+            elevation: 0,
+            backgroundColor: "black",
+          }}
+        >
+          <View>
+            <View style={{ flexDirection: "row" }}>
+              <Text
+                style={{ fontSize: 20, fontWeight: "bold", color: "white" }}
+              >
+                {item.title + "" + item.first_name + "" + item.last_name}
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: "row" }}>
+              <MaterialCommunityIcons
+                name={"business-outline"}
+                color={"gray"}
+                size={17}
+                style={{ justifyContent: "center", marginRight: 5 }}
+              />
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "gray",
+                  fontWeight: "400",
+                }}
+              >
+                {item.customer_name}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              alignItems: "flex-end",
+              flex: 1,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                marginStart: 6,
+                color: "white",
+                fontWeight: "bold",
+              }}
+            >
+              {item.no_of_pax}{" "}
+              <Text
+                style={{
+                  fontSize: 18,
+                  marginStart: 6,
+                  color: "white",
+                  fontWeight: "400",
+                }}
+              >
+                Pax
+              </Text>
+            </Text>
+            <Text style={{ fontSize: 16, color: "gray" }}>
+              {"# " + item.trip_id}
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={{ width: "100%", height: 1, backgroundColor: "#D3D3D3" }}
         />
+
+        {/* //middle label */}
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingTop: 10,
+            paddingBottom: 5,
+          }}
+        >
+          <View style={styles.namePaxContainer}>
+            <View style={{ flexDirection: "column" }}>
+              <View style={{ paddingBottom: 14 }}>
+                <Text style={styles.infoLabel}>PICK-UP</Text>
+                <Text style={styles.title}>{item.pickup_address}</Text>
+                <View style={{ flexDirection: "row" }}>
+                  <Text style={{ color: "#5A5A5A" }}>Fight :</Text>
+                  <Text style={{ color: "#5A5A5A" }}> {item.flight_no}</Text>
+                  <View
+                    style={{
+                      borderWidth: 2.5,
+                      height: 3,
+                      borderRadius: 1,
+                      marginStart: 5,
+                      alignSelf: "center",
+                      borderColor: "#5A5A5A",
+                    }}
+                  ></View>
+                  <Text style={{ color: "#5A5A5A" }}> Gate :</Text>
+                  <Text style={{ color: "#5A5A5A" }}> -</Text>
+                  <View
+                    style={{
+                      borderWidth: 2.5,
+                      height: 3,
+                      borderRadius: 1,
+                      marginStart: 5,
+                      alignSelf: "center",
+                      backgroundColor: "#5A5A5A",
+                      borderColor: "#5A5A5A",
+                    }}
+                  ></View>
+                  <Text style={{ color: "#5A5A5A" }}> Terminal :</Text>
+                  <Text style={{ color: "#5A5A5A" }}> -</Text>
+                </View>
+              </View>
+            </View>
+
+            <View
+              style={{
+                alignItems: "flex-end",
+                flex: 1,
+              }}
+            >
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                  {moment(item.pickup_time, "dd/mm/yyyy HH:mm:ss").format(
+                    "HH:mm"
+                  )}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View>
+            <Text style={styles.containerDropoffText}>DROP OFF</Text>
+            <Text style={styles.airlineNameText}>
+              {item.dropoff_address.split(",").shift()}
+            </Text>
+            <Text style={styles.airlineDetailsText}>
+              {item.dropoff_address
+                .slice(item.dropoff_address.indexOf(",") + 1)
+                .trim()}
+            </Text>
+          </View>
+        </View>
+
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              flex: 1,
+              justifyContent: "space-around",
+              paddingHorizontal: 15,
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                borderWidth: 1,
+                borderColor: "#979797",
+                borderRadius: 25,
+                marginEnd: 8,
+                justifyContent: "center",
+                alignItems: "center",
+                marginVertical: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontWeight: "500",
+                  marginEnd: 10,
+                  marginStart: 10,
+                  color: "black",
+                  textAlign: "center",
+                  textAlignVertical: "center",
+                  fontSize: 15,
+                  textTransform: "uppercase",
+                }}
+                onPress={() => {
+                  Linking.openURL("tel:" + item.mobile);
+                }}
+              >
+                {item.mobile}
+              </Text>
+
+              <View
+                style={{
+                  height: 35,
+                  width: 35,
+                  backgroundColor: "seagreen",
+                  borderRadius: 30,
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={"ios-call"}
+                  color={"white"}
+                  size={17}
+                  style={{ alignSelf: "center" }}
+                />
+              </View>
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Button
+                title={buttonStatus(item.status_name)}
+                style={styles.materialButtonPrimary}
+                onPress={() => {
+                  if (item.status_id == "1511") {
+                    Alert.alert("Job", "Do you want to accept this job", [
+                      {
+                        text: "No",
+                        //onPress: () => Alert.alert("Cancel Pressed"),
+                        style: "cancel",
+                      },
+                      {
+                        text: "Yes",
+                        onPress: () => {
+                          jobStatus(1512, item.trip_id);
+                        },
+                        //style: "cancel",
+                      },
+                    ]);
+                  } else if (item.status_id == "1512") {
+                    Alert.alert("Job", "Do you want to start this job", [
+                      {
+                        text: "No",
+                        //onPress: () => Alert.alert("Cancel Pressed"),
+                        style: "cancel",
+                      },
+                      {
+                        text: "Yes",
+                        onPress: () => {
+                          jobStatus(1513, item.trip_id);
+
+                          navigation.navigate("TripDetailsScreen", {
+                            passengerName:
+                              item.title +
+                              "" +
+                              item.first_name +
+                              "" +
+                              item.last_name,
+                            pickUp: item.pickup_address,
+                            dropOff: item.dropoff_address,
+                            pickUpTime: moment(
+                              item.pickup_time,
+                              "dd/mm/yyyy HH:mm:ss"
+                            ).format("HH:mm"),
+                            trip: item.trip_id,
+                            noPax: item.no_of_pax,
+                            airlineCode: item.airline_code,
+                            flightNo: item.flight_no,
+                            terminal: item.terminal,
+                            flightSchTime: item.flight_sch_time,
+                            newGreeterId: item.greeter_id,
+                            greeterName: item.greeter_name,
+                            newStatusId: 1515,
+                            statusName: "On Location",
+                          });
+                        },
+                        //style: "cancel",
+                      },
+                    ]);
+                  } else if (
+                    item.status_id == "1513" ||
+                    item.status_id == "1515" ||
+                    item.status_id == "1516" ||
+                    item.status_id == "1517" ||
+                    item.status_id == "1518"
+                  ) {
+                    navigation.navigate("TripDetailsScreen", {
+                      passengerName:
+                        item.title + "" + item.first_name + "" + item.last_name,
+                      pickUp: item.pickup_address,
+                      dropOff: item.dropoff_address,
+                      pickUpTime: moment(
+                        item.pickup_time,
+                        "dd/mm/yyyy HH:mm:ss"
+                      ).format("HH:mm"),
+                      trip: item.trip_id,
+                      noPax: item.no_of_pax,
+                      airlineCode: item.airline_code,
+                      flightNo: item.flight_no,
+                      terminal: item.terminal,
+                      flightSchTime: item.flight_sch_time,
+                      newGreeterId: item.greeter_id,
+                      greeterName: item.greeter_name,
+                      newStatusId: item.status_id,
+                      statusName: item.status_name,
+                    });
+                  } else {
+                    ToastAndroid.show(item.status_name, ToastAndroid.SHORT);
+                  }
+                }}
+              />
+            </View>
+          </View>
+        </View>
       </View>
+      // <View>
+      //   {/* <Item
+      //     bookingId={item.booking_id}
+      //     tripId={item.trip_id}
+      //     companyId={item.company_id}
+      //     branchId={item.branch_id}
+      //     customerId={item.customer_id}
+      //     customerName={item.customer_name}
+      //     serviceType={item.service_type}
+      //     pickupTime={moment(item.pickup_time, "dd/mm/yyyy HH:mm:ss").format(
+      //       "HH:mm"
+      //     )}
+      //     noPax={item.no_of_pax}
+      //     pickupNotes={item.pickup_notes}
+      //     title={item.title}
+      //     name={item.title + "" + item.first_name + "" + item.last_name}
+      //     mobile={item.mobile}
+      //     email={item.email}
+      //     airlineCode={item.airline_code}
+      //     flightNo={item.flight_no}
+      //     terminal={item.terminal}
+      //     flightSchTime={item.flight_sch_time}
+      //     commissionAgentId={item.commission_agent_id}
+      //     greeterId={item.greeter_id}
+      //     greeterName={item.greeter_name}
+      //     statusId={item.status_id}
+      //     statusName={item.status_name}
+      //     onSiteTime={item.on_site_time}
+      //     boardTime={item.board_time}
+      //     pickupFrom={item.pickup_address}
+      //     dropOffAdd={item.dropoff_address}
+      //     navigation={navigation}
+      //   /> */}
+      // </View>
     );
   };
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
-      apiCall();
       setRefreshing(false);
     }, 2000);
   }, []);
@@ -686,15 +659,26 @@ export default function HomeScreen({ navigation }) {
       >
         <Calendar onSelectDate={setSelectedDate} selected={selectedDate} />
 
-        <FlatList
-          data={data}
-          renderItem={renderItem}
-          keyExtractor={(item) => {
-            item.booking_id;
-          }}
-          // getItemCount={getItemCount}
-          // getItem={getItem}
-        />
+        {greeterJob.length > 0 ? (
+          <FlatList
+            data={greeterJob}
+            renderItem={renderItem}
+            keyExtractor={(item) => {
+              item.booking_id;
+            }}
+          />
+        ) : (
+          <Text
+            style={{
+              textAlign: "center",
+              textAlignVertical: "center",
+              paddingVertical: 300,
+            }}
+          >
+            {" "}
+            No job found
+          </Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

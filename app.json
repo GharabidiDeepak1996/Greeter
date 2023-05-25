@@ -2,12 +2,13 @@
   "expo": {
     "name": "Greeter",
     "slug": "greeter",
-
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -21,7 +22,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
-    "owner": "testios7977"
+    "owner": "testios7977",
+    "extra": {
+      "eas": {
+        "projectId": "18b84ceb-22d5-4cab-8d9a-425c30988ee2"
+      }
+    }
   }
 }
