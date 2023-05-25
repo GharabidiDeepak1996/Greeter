@@ -15,6 +15,7 @@ import {
   Linking,
   ToastAndroid,
   RefreshControl,
+  ActivityIndicator,
   Alert,
 } from "react-native";
 import { Button } from "@react-native-material/core";

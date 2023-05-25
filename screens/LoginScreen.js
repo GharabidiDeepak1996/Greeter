@@ -3,7 +3,7 @@ import {
   ToastAndroid,
   View,
   StyleSheet,
-  Alert,
+  ActivityIndicator,
   TextInput,
 } from "react-native";
 import { Button } from "@react-native-material/core";
@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [loader, setLoader] = useState(false);
   const [invalidEmail, setInvalidEmail] = useState("");
   const [invalidPass, setInvalidPass] = useState("");
 
@@ -57,6 +57,7 @@ export default function LoginScreen({ navigation }) {
 
   const loginAuthenticate = async () => {
     try {
+      setLoader(true);
       const response = await fetch(
         "http://132.148.73.104:8082/core/ver1.0/verification/validate-greeter",
         {
@@ -76,7 +77,7 @@ export default function LoginScreen({ navigation }) {
       if (statusCode == 200) {
         const json = await response.json();
         console.log(json.isSuccess);
-
+        setLoader(false);
         if (json.isSuccess == true) {
           let obj = {
             userId: Object.values(json.greeterContext)[0],
@@ -100,8 +101,10 @@ export default function LoginScreen({ navigation }) {
         // setData(json.Pairings)
       }
     } catch (error) {
+      setLoader(false);
       console.error(error);
     } finally {
+      setLoader(false);
     }
   };
 
@@ -133,6 +136,13 @@ export default function LoginScreen({ navigation }) {
             loginAuthenticate();
           }
         }}
+      />
+
+      <ActivityIndicator
+        animating={loader}
+        size="large"
+        color="#0000ff"
+        style={styles.activityIndicator}
       />
 
       {/* <Text style={styles.loremIpsum}>
@@ -217,5 +227,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     marginVertical: 20,
+  },
+  activityIndicator: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 50,
   },
 });

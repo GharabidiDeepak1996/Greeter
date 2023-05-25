@@ -1,34 +1,8 @@
 import AnimatedLottieView from "lottie-react-native";
 import { Text, StyleSheet, View, StatusBar } from "react-native";
-import * as Notifications from "expo-notifications";
 
-const registerForPushNotificationsAsync = async () => {
-  try {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      throw new Error("Permission not granted!");
-    }
-    console.log("checkPermission", finalStatus);
-    //const token = (await Notifications.getExpoPushTokenAsync()).data;
-    const token = (await Notifications.getDevicePushTokenAsync()).data;
-    updateFCMToken(token);
-    console.log("expo token", token);
-
-    return token;
-  } catch (error) {
-    console.log("error", error);
-    console.error(error);
-  }
-};
 export default function SplashScreen({ navigation }) {
   setTimeout(() => {
-    // registerForPushNotificationsAsync();
     navigation.navigate("LoginScreen");
   }, 3000);
 
