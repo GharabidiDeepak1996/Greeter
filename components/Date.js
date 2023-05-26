@@ -17,7 +17,7 @@ const Date = ({ date, onSelectDate, selected }) =>{
         onPress={() =>{ 
             console.log(fullDate)
             onSelectDate(fullDate)}}
-      style={[styles.card, selected === fullDate && { backgroundColor: "black" }]}>
+      style={[styles.card, selected === fullDate && { backgroundColor: "#360063" }]}>
 
 <Text
         style={[styles.big, selected === fullDate && { color: "#fff" }]}
@@ -43,8 +43,9 @@ export default Date
 
 const styles = StyleSheet.create({
     card: {
-      backgroundColor: '#eee',
+      backgroundColor: '#ffffff',
       borderRadius: 10,
+      borderWidth:1,
       borderColor: '#ddd',
       padding: 4,
       marginVertical: 8,
@@ -54,10 +55,12 @@ const styles = StyleSheet.create({
       marginHorizontal: 2,
     },
     big: {
+      color:'#666666',
      // fontWeight: 'bold',
       fontSize: 14,
     },
     medium: {
+      color:'#666666',
       fontSize: 16,
     },
   })

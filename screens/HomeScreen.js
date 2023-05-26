@@ -218,75 +218,191 @@ export default function HomeScreen({ navigation }) {
     return (
       <View key={item.trip_id} style={styles.containerNew}>
         {/* top label */}
+
+        <View style={{
+          alignSelf:'center'}}>
         <View
-          style={{
-            flexDirection: "row",
-            borderTopEndRadius: 8,
-            borderTopStartRadius: 8,
-            paddingHorizontal: 15,
-            paddingVertical: 10,
-            elevation: 0,
-            backgroundColor: "black",
-          }}
+        style={{ 
+          borderTopEndRadius: 25,
+          borderTopStartRadius: 25,
+          borderBottomEndRadius:25,
+          borderBottomStartRadius:25,
+          paddingHorizontal: 15,
+          paddingVertical: 10,
+          elevation: 0,
+          marginTop:-20,
+          backgroundColor: "#360063",
+          alignSelf:'baseline'}}
+        
         >
-          <View>
-            <View style={{ flexDirection: "row" }}>
               <Text
-                style={{ fontSize: 20, fontWeight: "bold", color: "white" }}
+                style={{ 
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: "white",
+                  alignContent:'center'           
+                  }}
               >
                 {item.title + "" + item.first_name + "" + item.last_name}
               </Text>
-            </View>
+        </View>
+        </View>
 
-            <View style={{ flexDirection: "row" }}>
-              <MaterialCommunityIcons
-                name={"business-outline"}
-                color={"gray"}
+        <View
+      style={[
+        styles.container,
+        {
+          // Try setting `flexDirection` to `"row"`.
+          flexDirection: 'row',
+        },
+      ]}>
+
+    {/* left */}
+       <View style={{flex: 1}}>
+      <View
+            style={{
+              alignItems: 'flex-end',
+              flex: 1,
+              flexDirection:'row',
+              marginStart:15
+            }}
+          >
+          <MaterialCommunityIcons
+                name={"airplane-sharp"}
+                color={"black"}
                 size={17}
-                style={{ justifyContent: "center", marginRight: 5 }}
+                style={{  }}
               />
+            <Text
+              style={{
+                fontSize: 16,
+                marginStart: 6,
+                color: "black",
+                fontWeight: "bold",
+              }}
+            >
+              {item.flight_no}{" "}
               <Text
                 style={{
                   fontSize: 16,
-                  color: "gray",
+                  marginStart: 6,
+                  color: "black",
                   fontWeight: "400",
                 }}
               >
-                {item.customer_name}
+                
               </Text>
-            </View>
+            </Text>
           </View>
 
-          <View
+      </View>
+
+       {/* center */}
+      <View style={{flex: 1}}>
+      <View
             style={{
-              alignItems: "flex-end",
+              alignItems: 'flex-end',
+              justifyContent: "center",
               flex: 1,
+              flexDirection:'row',
+              marginStart:10
             }}
           >
+                <MaterialCommunityIcons
+                name={"time"}
+                color={"black"}
+                size={17}
+                style={{  }}
+              />
+        
+        <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {moment(item.pickup_time, "dd/mm/yyyy HH:mm:ss").format(
+                    "HH:mm"
+                  )}
+                </Text>
+        
+          </View>
+
+      </View>
+
+       {/* right */}
+      <View style={{flex: 1}}>
+      <View
+            style={{
+              flexDirection:'row-reverse',
+              marginStart:12
+            }}
+          >
+        
             <Text
               style={{
-                fontSize: 18,
-                marginStart: 6,
-                color: "white",
+                fontSize: 16,
+                marginStart: 2,
+                color: "black",
                 fontWeight: "bold",
               }}
             >
               {item.no_of_pax}{" "}
               <Text
                 style={{
-                  fontSize: 18,
+                  fontSize: 16,
                   marginStart: 6,
-                  color: "white",
+                  color: "black",
                   fontWeight: "400",
                 }}
               >
                 Pax
               </Text>
             </Text>
-            <Text style={{ fontSize: 16, color: "gray" }}>
-              {"# " + item.trip_id}
+            <MaterialCommunityIcons
+                name={"person"}
+                color={"black"}
+                size={17}
+                style={{  }}
+              />
+          </View>
+
+      </View>
+    </View>
+
+
+        <View  style={{
+            flexDirection: "row",
+            marginTop:10,
+            backgroundColor:'#EEE9F3',
+            paddingVertical:5
+          }}>
+
+            <View style={{ flexDirection: "row" }}>
+              {/* <MaterialCommunityIcons
+                name={"business-outline"}
+                color={"gray"}
+                size={17}
+                style={{ justifyContent: "center", marginRight: 5 }}
+              /> */}
+              <Text
+                style={{
+                  marginStart:12,
+                  fontSize: 12,
+                  color: "#360063",
+                  fontWeight: "400",
+                }}
+              >
+                {item.customer_name}
+              </Text>
+            </View>
+
+        <View
+            style={{
+              alignItems: "flex-end",
+              flex: 1,
+            }}
+          >
+            <Text style={{ fontSize: 12, color: "#360063",marginEnd:10,fontWeight:'400' }}>
+              {"Trip# " + item.trip_id}
             </Text>
           </View>
+
         </View>
 
         <View
@@ -344,13 +460,6 @@ export default function HomeScreen({ navigation }) {
                 flex: 1,
               }}
             >
-              <View>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {moment(item.pickup_time, "dd/mm/yyyy HH:mm:ss").format(
-                    "HH:mm"
-                  )}
-                </Text>
-              </View>
             </View>
           </View>
 
@@ -428,6 +537,8 @@ export default function HomeScreen({ navigation }) {
             <View style={{ flex: 1 }}>
               <Button
                 title={buttonStatus(item.status_name)}
+                color="#ffffff"
+                
                 style={styles.materialButtonPrimary}
                 onPress={() => {
                   if (item.status_id == "1511") {
@@ -639,18 +750,23 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flexDirection: "row", backgroundColor: "black" }}>
+      <View style={{ flexDirection: "row", backgroundColor: "#360063" }}>
         <Text style={styles.driversLogin}>My Trips</Text>
       </View>
 
-      <LinearGradient
+      <Calendar onSelectDate={setSelectedDate} selected={selectedDate} />
+
+      {/* <LinearGradient
         start={{ x: 1, y: -2 }}
         end={{ x: 0, y: 0 }}
         colors={["#ffff", "#ffff", "#ffff"]}
         style={{ alignItems: "center", paddingBottom: 2 }}
       >
-        <Text style={{ color: "gray" }}>Swipe down to refresh</Text>
-      </LinearGradient>
+        <Text style={{ color: "#360063" }}>Swipe down to refresh</Text>
+      </LinearGradient> */}
+
+
+      
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -658,9 +774,9 @@ export default function HomeScreen({ navigation }) {
         style={styles.container}
         horizontal={false}
       >
-        <Calendar onSelectDate={setSelectedDate} selected={selectedDate} />
 
         {greeterJob.length > 0 ? (
+          <View style={{marginTop:20}}>
           <FlatList
             data={greeterJob}
             renderItem={renderItem}
@@ -668,6 +784,7 @@ export default function HomeScreen({ navigation }) {
               item.booking_id;
             }}
           />
+          </View>
         ) : (
           <Text
             style={{
@@ -706,7 +823,8 @@ const styles = StyleSheet.create({
   },
   container: {
     //flex: 1,
-    backgroundColor: "#f5f5f5",
+    marginTop:10,
+    backgroundColor: "#ffffff",
   },
   scrollView: {
     flex: 1,
@@ -718,16 +836,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 0,
     borderRadius: 16,
-
     marginVertical: 8,
     marginHorizontal: 16,
   },
   containerNew: {
     backgroundColor: "#fff",
     borderRadius: 8,
-    elevation: 6,
-    borderColor: "#18599a",
-    marginVertical: 12,
+    elevation: 0,
+    borderWidth:0.5,
+    borderColor: "#000000",
+    marginVertical: 20,
     marginHorizontal: 16,
   },
   passengerContainer: {
@@ -785,10 +903,12 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 25,
     marginTop: 11,
     marginBottom: 11,
-    height: 45,
+    height: 40,
     marginStart: 8,
     justifyContent: "center",
-    backgroundColor: "#1a1a1a",
+  borderColor:'black',
+  borderWidth:0.5,
+    elevation:0,
     fontSize: 16,
     textTransform: "uppercase",
   },

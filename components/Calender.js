@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
    // padding: 20,
   },
   scroll: {
+    backgroundColor:'#E6E6E7'
    // height: 150,
   },
 })
