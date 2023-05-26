@@ -118,8 +118,8 @@ export default function HomeScreen({ navigation }) {
             service_provider_id: 2,
             customer_id: 4, //customerID, //changes are here
             branch_id: 1,
-            from_date: moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
-            to_date: moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
+            from_date: "05/25/2023 00:00", //moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
+            to_date: "05/25/2023 00:00", //moment(selectedDate, "YYYY-MM-DD").format("MM/DD/YYYY"),
             // from_date: moment(new Date(), "YYYY-MM-DDTHH:mm:ss.sssZ").format(
             //   "MM/DD/YYYY HH:mm"
             // ),

@@ -22,8 +22,6 @@ export default function TripDetailsScreen({ navigation, route }) {
     greeterName,
     newStatusId,
     statusName,
-    
-    
   } = route.params;
 
   const [statusID, setStatusID] = useState(newStatusId);
@@ -99,10 +97,10 @@ export default function TripDetailsScreen({ navigation, route }) {
     } finally {
     }
   };
-  const navigateBack=async()=>{
+  const navigateBack = async () => {
     navigation.goBack();
-   // navigation.navigate("BottomNavigation");
-  }
+    // navigation.navigate("BottomNavigation");
+  };
   return (
     <View style={{ flex: 1 }}>
       <View
@@ -110,7 +108,7 @@ export default function TripDetailsScreen({ navigation, route }) {
           flexDirection: "row",
           width: "100%",
           height: 55,
-          backgroundColor: "black",
+          backgroundColor: "#360063",
           borderBottomColor: "grey",
         }}
       >
@@ -135,162 +133,181 @@ export default function TripDetailsScreen({ navigation, route }) {
           Current Trip
         </Text>
       </View>
-
-      <View style={{ flexDirection: "column", backgroundColor: "#222222" }}>
-        <Text
-          style={{
-            paddingHorizontal: 16,
-            marginTop: 8,
-            color: "white",
-            fontSize: 20,
-            fontWeight: "bold",
-          }}
-        >
-          {passengerName}
-        </Text>
-
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Trip# {trip}</Text>
-
-          <View style={styles.headerTime}>
-            <MaterialCommunityIcons
-              style={{ paddingRight: 5 }}
-              name="time-outline"
-              color={"#AEAEAE"}
-              size={16}
-            />
-            <Text style={{ color: "#AEAEAE" }}>{pickUpTime}</Text>
-          </View>
-        </View>
-      </View>
-
-      <View
-        style={{
-          marginHorizontal: 18,
-          flex: 1,
-          marginVertical: 15,
-        }}
-      >
-        {/* Boarded label */}
-        {boardedLable ? (
+      <View style={{ backgroundColor: "white", flex: 1 }}>
+        {/* overll screen pading */}
+        <View>
           <View
             style={{
-              backgroundColor: "#ffe1b0",
-              borderRadius: 5,
               flexDirection: "row",
-              marginBottom: 12,
-              padding: 5,
+              justifyContent: "space-between",
+              padding: 12,
             }}
           >
-            <MaterialCommunityIcons
-              style={{ paddingRight: 5, fontWeight: "800" }}
-              name="time-outline"
-              color={"#af7749"}
-              size={18}
-            />
-            <Text style={{ color: "#af7749", fontWeight: "bold" }}>
-              Boarded on {pickUpTime}
+            <View style={{ flexDirection: "row" }}>
+              <Text
+                style={{ fontWeight: "600", fontSize: 15, color: "#360063" }}
+              >
+                Started at{" "}
+              </Text>
+              <Text
+                style={{ fontWeight: "600", fontSize: 15, color: "#360063" }}
+              >
+                2:30 PM
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <Text
+                style={{ fontWeight: "600", fontSize: 15, color: "#360063" }}
+              >
+                Trip#
+              </Text>
+              <Text
+                style={{ fontWeight: "600", fontSize: 15, color: "#360063" }}
+              >
+                122645632
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              backgroundColor: "#EEE9F3",
+              width: "100%",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                color: "#360063",
+                paddingLeft: 12,
+                paddingVertical: 5,
+              }}
+            >
+              Customer Info
             </Text>
           </View>
-        ) : null}
+          <View style={{ padding: 14 }}>
+            <View
+              style={{
+                flexDirection: "row",
+              }}
+            >
+              <View style={{ flex: 2 }}>
+                <Text style={{ color: "#121212" }}>Customer</Text>
+                <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                  Kay S. Johnson
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#121212" }}>Pax#</Text>
+                <Text style={{ fontWeight: "600", fontSize: 17 }}>05</Text>
+              </View>
+            </View>
 
-        <View style={{ paddingBottom: 20 }}>
-          <Text style={styles.containerPickupText}>PICK-UP</Text>
-          <Text style={styles.airlineNameText}>{pickUp}</Text>
-          <Text style={styles.airlineDetailsText}>
-            {airlineCode} | {terminal}
-          </Text>
-        </View>
-
-        <View>
-          <Text style={styles.containerDropoffText}>DROP OFF</Text>
-
-          <Text style={styles.airlineNameText}>
-            {dropOff.split(",").shift()}
-          </Text>
-          <Text style={styles.airlineDetailsText}>
-            {dropOff.slice(dropOff.indexOf(",") + 1)}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            borderStyle: "dotted",
-            borderWidth: 1,
-            borderRadius: 1,
-            marginVertical: 16,
-          }}
-        />
-
-        {/* <View style={{ paddingBottom: 16 }}>
-          <Text style={styles.airlineDetailsText}>Pax Name</Text>
-          <Text style={styles.airlineNameText}>{passengerName}</Text>
-        </View> */}
-        {/* 
-        <View style={{ paddingBottom: 16 }}>
-          <Text style={styles.airlineDetailsText}>Pax Type</Text>
-          <Text style={styles.airlineNameText}>Pilot</Text>
-        </View> */}
-
-        <View style={{ paddingBottom: 16, flexDirection: "row" }}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.airlineDetailsText}>Flight #</Text>
-            <Text style={styles.airlineNameText}>{flightNo}</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                marginTop: 16,
+              }}
+            >
+              <View style={{ flex: 2 }}>
+                <Text style={{ color: "#121212" }}>Type</Text>
+                <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                  VIP Customer
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#121212" }}>Mobile</Text>
+                <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                  7977390526
+                </Text>
+              </View>
+            </View>
           </View>
 
-          <View style={{ flex: 1 }}>
-            <Text style={styles.airlineDetailsText}>Terminal</Text>
-            <Text style={styles.airlineNameText}>{terminal}</Text>
+          <View
+            style={{
+              backgroundColor: "#EEE9F3",
+              width: "100%",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                color: "#360063",
+                paddingLeft: 12,
+                paddingVertical: 5,
+              }}
+            >
+              Trip Info
+            </Text>
           </View>
+          <View style={{ padding: 14 }}>
+            <View
+              style={{
+                flexDirection: "row",
+              }}
+            >
+              <View style={{ flex: 2 }}>
+                <Text style={{ color: "#121212" }}>Pick-up Date</Text>
+                <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                  05/25/2023 12:00
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#121212" }}>Flight#</Text>
+                <Text style={{ fontWeight: "600", fontSize: 17 }}>AA1352</Text>
+              </View>
+            </View>
 
-          <View style={{ flex: 1 }}>
-            <Text style={styles.airlineDetailsText}>Gate #</Text>
-            <Text style={styles.airlineNameText}>NA</Text>
+            <View style={{ marginTop: 16 }}>
+              <Text style={{ color: "#121212" }}>Pick-up</Text>
+              <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                JKF Airport
+              </Text>
+            </View>
+            <View style={{ marginTop: 16 }}>
+              <Text style={{ color: "#121212" }}>Drop-off</Text>
+              <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                Hotel Hilton
+              </Text>
+              <Text style={{ color: "gray" }}>
+                144-02 135th Avq, Queens, NY 11436,USA
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              backgroundColor: "#EEE9F3",
+              width: "100%",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                color: "#360063",
+                paddingLeft: 12,
+                paddingVertical: 5,
+              }}
+            >
+              Instructions
+            </Text>
+          </View>
+          <View style={{ padding: 14 }}>
+            <View>
+              <Text style={{ color: "#121212" }}>Pick-up Notes</Text>
+              <Text style={{ fontWeight: "600", fontSize: 17 }}>
+                Please pick-me up at terminal A. I have 5 baggage. I need
+                wheelchair
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            if (statusID == 1515) {
-              Alert.alert("Alert", "Have you reached on location?", [
-                {
-                  text: "No",
-                  onPress: () => console.log("No Pressed"),
-                  style: "cancel",
-                },
-                {
-                  text: "Yes",
-                  onPress: () => {
-                    setMainButtonName("Passanger at site");
-                    jobStatus(1516);
-                  },
-                },
-              ]);
-            } else if (statusID == 1516) {
-              Alert.alert("Alert", "Is everyone boarded?", [
-                {
-                  text: "No",
-                  onPress: () => console.log("No Pressed"),
-                  style: "cancel",
-                },
-                {
-                  text: "Yes",
-                  onPress: () => {
-                    // validati();
-                    setBoardedLable(true);
-                    setMainButtonName("Complete");
-                    jobStatus(1519);
-                  },
-                },
-              ]);
-            } else if (statusID == 1519) {
-              Alert.alert(
-                "Alert",
-                "Are you sure you want to complete this trip?",
-                [
+        <View style={styles.bottomView}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              if (statusID == 1515) {
+                Alert.alert("Alert", "Have you reached on location?", [
                   {
                     text: "No",
                     onPress: () => console.log("No Pressed"),
@@ -299,24 +316,200 @@ export default function TripDetailsScreen({ navigation, route }) {
                   {
                     text: "Yes",
                     onPress: () => {
-                      //validati();
-                      //jobStatus();
-                      navigation.navigate("BottomNavigation");
+                      setMainButtonName("Passanger at site");
+                      jobStatus(1516);
                     },
                   },
-                ]
-              );
-            }
-          }}
-        >
-          <Text style={{ color: "#ffff", fontSize: 16 }}>{mainButtonName}</Text>
-        </TouchableOpacity>
+                ]);
+              } else if (statusID == 1516) {
+                Alert.alert("Alert", "Is everyone boarded?", [
+                  {
+                    text: "No",
+                    onPress: () => console.log("No Pressed"),
+                    style: "cancel",
+                  },
+                  {
+                    text: "Yes",
+                    onPress: () => {
+                      // validati();
+                      setBoardedLable(true);
+                      setMainButtonName("Complete");
+                      jobStatus(1519);
+                    },
+                  },
+                ]);
+              } else if (statusID == 1519) {
+                Alert.alert(
+                  "Alert",
+                  "Are you sure you want to complete this trip?",
+                  [
+                    {
+                      text: "No",
+                      onPress: () => console.log("No Pressed"),
+                      style: "cancel",
+                    },
+                    {
+                      text: "Yes",
+                      onPress: () => {
+                        //validati();
+                        //jobStatus();
+                        navigation.navigate("BottomNavigation");
+                      },
+                    },
+                  ]
+                );
+              }
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              <View
+                style={{
+                  height: 25,
+                  width: 25,
+                  backgroundColor: "black",
+                  borderRadius: 30,
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={"ios-call"}
+                  color={"white"}
+                  size={14}
+                  style={{ alignSelf: "center" }}
+                />
+              </View>
+
+              <Text
+                style={{
+                  color: "black",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  paddingLeft: 5,
+                }}
+              >
+                Call Customer
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              if (statusID == 1515) {
+                Alert.alert("Alert", "Have you reached on location?", [
+                  {
+                    text: "No",
+                    onPress: () => console.log("No Pressed"),
+                    style: "cancel",
+                  },
+                  {
+                    text: "Yes",
+                    onPress: () => {
+                      setMainButtonName("Passanger at site");
+                      jobStatus(1516);
+                    },
+                  },
+                ]);
+              } else if (statusID == 1516) {
+                Alert.alert("Alert", "Is everyone boarded?", [
+                  {
+                    text: "No",
+                    onPress: () => console.log("No Pressed"),
+                    style: "cancel",
+                  },
+                  {
+                    text: "Yes",
+                    onPress: () => {
+                      // validati();
+                      setBoardedLable(true);
+                      setMainButtonName("Complete");
+                      jobStatus(1519);
+                    },
+                  },
+                ]);
+              } else if (statusID == 1519) {
+                Alert.alert(
+                  "Alert",
+                  "Are you sure you want to complete this trip?",
+                  [
+                    {
+                      text: "No",
+                      onPress: () => console.log("No Pressed"),
+                      style: "cancel",
+                    },
+                    {
+                      text: "Yes",
+                      onPress: () => {
+                        //validati();
+                        //jobStatus();
+                        navigation.navigate("BottomNavigation");
+                      },
+                    },
+                  ]
+                );
+              }
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              <View
+                style={{
+                  height: 25,
+                  width: 25,
+                  backgroundColor: "black",
+                  borderRadius: 30,
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={"arrow-forward-outline"}
+                  color={"white"}
+                  size={16}
+                  style={{ alignSelf: "center" }}
+                />
+              </View>
+
+              <Text
+                style={{
+                  color: "black",
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  paddingLeft: 5,
+                }}
+              >
+                On Location
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  bottomView: {
+    //backgroundColor: "red",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    marginBottom: 4,
+    width: "100%",
+    height: 60,
+    flexDirection: "row",
+    position: "absolute", //Here is the trick
+    bottom: 0, //Here is the trick
+  },
   header: {
     backgroundColor: "#222222",
     flexDirection: "row",
@@ -387,15 +580,14 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    width: "100%",
-    backgroundColor: "black",
+    backgroundColor: "white",
+    height: 35,
+    width: "48%",
     borderRadius: 30,
     borderWidth: 1,
     borderColor: "black",
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "space-around",
-    paddingBottom: 12,
-    paddingTop: 12,
   },
   text: {
     color: "#fff",
